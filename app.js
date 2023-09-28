@@ -1,9 +1,10 @@
 const express = require('express');
 const fileUpload = require('express-fileupload');
-const csvParser = require('csv-parser');
+const csv = require('csv-parser');
 const fs = require('fs');
-const PDFLib = require('pdf-lib');
+const path = require('path');
 const JSZip = require('jszip');
+const { Readable } = require('stream');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -11,9 +12,12 @@ const port = process.env.PORT || 3000;
 // Middleware for handling file uploads
 app.use(fileUpload());
 
+// Serve static files (CSS and JavaScript)
+app.use(express.static(path.join(__dirname, 'public')));
+
 // Serve the HTML file
 app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/index.html');
+  res.sendFile(__dirname + '/public/index.html');
 });
 
 // Endpoint for handling file uploads
@@ -29,22 +33,24 @@ app.post('/upload', async (req, res) => {
   const pdfDuplicates = [];
 
   try {
-    // Read the PDF file content
-    const pdfData = fs.readFileSync(pdfFile.tempFilePath);
+    // Process the CSV file with a comma delimiter (default)
+    const csvDataBuffer = req.files.csvFile.data;
 
-    // Process the CSV file
-    fs.createReadStream(csvFile.tempFilePath)
-      .pipe(csvParser())
+    const stream = new Readable();
+    stream.push(csvDataBuffer);
+    stream.push(null);
+
+    stream
+      .pipe(csv())
       .on('data', (row) => {
-        const filename = row.filename;
+        const filename = row.filename; // Assuming "filename" is the column name
         const uniqueFilename = `${filename} - ${pdfName}.pdf`;
 
-        // Clone the PDF by creating a new PDF document and adding pages
-        const pdfDoc = PDFLib.PDFDocument.create();
-        const pdfBytes = await pdfDoc.addPage(PDFLib.PDFPage.create([612, 792])); // Letter size page
-        pdfBytes.copyPages(pdfData);
+        // Copy the PDF file content directly
+        const pdfData = Buffer.from(pdfFile.data);
 
-        pdfDuplicates.push({ name: uniqueFilename, data: pdfDoc.save() });
+        // Push the duplicated PDF file content
+        pdfDuplicates.push({ name: uniqueFilename, data: pdfData });
       })
       .on('end', () => {
         // Create a zip file containing duplicated PDFs
@@ -67,7 +73,8 @@ app.post('/upload', async (req, res) => {
           });
       });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to read the PDF file' });
+    console.error(error);
+    res.status(500).json({ error: 'Failed to process the files' });
   }
 });
 

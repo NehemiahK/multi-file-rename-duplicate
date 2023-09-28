@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Duplicator</title>
+    <link rel="stylesheet" href= "styles.css">
+</head>
+<body>
+    <h1>PDF Duplicator</h1>
+    <p>Upload a CSV file with filenames and a PDF file to duplicate. It will copy filename from the column "filename"</p>
+    <p>The duplicated PDF files will have filenames in the format: &lt;filename&gt; - &lt;pdfName&gt;.pdf</p>
+    <form id="uploadForm" action="/upload" method="POST" enctype="multipart/form-data">
+        <div class="row">
+            <label for="pdfFile">Select a PDF file to duplicate:</label>
+            <input type="file" name="pdfFile" id="pdfFile" accept=".pdf" required>
+        </div>
+        <div class="row">
+            <label for="csvFile">Select a CSV file with filenames:</label>
+            <input type="file" name="csvFile" id="csvFile" accept=".csv" required>
+        </div>
+        <div class="row">
+            <label for="pdfName">Enter PDF name (optional):</label>
+            <input type="text" name="pdfName" id="pdfName">
+        </div>
+        <button class="row" type="submit">Duplicate PDFs</button>
+    </form>
+    <div id="loader" class="hidden">
+        <p>Duplicating PDFs...</p>
+    </div>
+    <a id="downloadLink" class="hidden" download="pdf_duplicates.zip">Download Duplicated PDFs</a>
+    <script src="script.js"></script>
+</body>
+</html>
