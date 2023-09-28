@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PDF Duplicator</title>
+</head>
+<body>
+  <h1>PDF Duplicator</h1>
+  <form action="/upload" method="post" enctype="multipart/form-data">
+    <input type="file" name="pdfFile" accept=".pdf" required>
+    <input type="file" name="csvFile" accept=".csv" required>
+    <input type="text" name="pdfName" placeholder="Enter PDF Name (optional)">
+    <button type="submit">Upload and Duplicate</button>
+  </form>
+</body>
+</html>
+`
